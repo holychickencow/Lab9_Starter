@@ -47,6 +47,11 @@
       width: 122px;
     }
   </style>
+
+  <script src="https://cdn.trackjs.com/releases/current/tracker.js"></script>
+  <script>
+    window.TrackJS && TrackJS.install({ token: 'YOUR_TRACKJS_TOKEN' });
+  </script>
 </head>
 
 <body>
@@ -88,6 +93,13 @@
   </main>
 
   <script>
+    class ValidationError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = 'ValidationError';
+      }
+    }
+
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -95,13 +107,51 @@
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      try {
+        if (!firstNum || !secondNum) {
+          throw new ValidationError('Both numbers must be provided');
+        }
+        output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      } catch (error) {
+        if (error instanceof ValidationError) {
+          console.error('Validation Error:', error);
+        } else {
+          console.error('Error during calculation:', error);
+        }
+        output.innerHTML = error.message;
+      } finally {
+        console.log('Calculation attempt finished');
+      }
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
 
-    // Start your code here
-    // You may move this JS to another file if you wish
+    errorBtns[0].addEventListener('click', () => console.log('Console Log button clicked!'));
+    errorBtns[1].addEventListener('click', () => console.error('Console Error button clicked!'));
+    let count = 0;
+    errorBtns[2].addEventListener('click', () => {
+      count++;
+      console.count(`Console Count button clicked ${count} times`);
+    });
+    errorBtns[3].addEventListener('click', () => console.warn('Console Warn button clicked!'));
+    errorBtns[4].addEventListener('click', () => console.assert(false, 'Console Assert button clicked!'));
+    errorBtns[5].addEventListener('click', () => console.clear());
+    errorBtns[6].addEventListener('click', () => console.dir(document.body));
+    errorBtns[7].addEventListener('click', () => console.dirxml(document));
+    errorBtns[8].addEventListener('click', () => console.group('Console Group Start'));
+    errorBtns[9].addEventListener('click', () => console.groupEnd('Console Group End'));
+    errorBtns[10].addEventListener('click', () => console.table([{ name: 'Alice', age: 10 }, { name: 'Bob', age: 11 }]));
+    errorBtns[11].addEventListener('click', () => console.time('Timer'));
+    errorBtns[12].addEventListener('click', () => console.timeEnd('Timer'));
+    errorBtns[13].addEventListener('click', () => console.trace('Console Trace button clicked!'));
+    errorBtns[14].addEventListener('click', () => {
+      nonExistentFunction();
+    });
+
+    window.onerror = function (msg, url, lineNo, columnNo, error) {
+      console.error('Global Error:', msg);
+      return true; 
+    };
   </script>
 </body>
 
